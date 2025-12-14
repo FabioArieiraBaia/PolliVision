@@ -213,6 +213,7 @@ Full Stack Developer | AI Enthusiast
 
 [![Website](https://img.shields.io/badge/Website-fabioarieira.com-fbbf24?style=for-the-badge)](https://fabioarieira.com)
 [![GitHub](https://img.shields.io/badge/GitHub-FabioArieiraBaia-181717?style=for-the-badge&logo=github)](https://github.com/FabioArieiraBaia)
+[![Discord](https://img.shields.io/badge/Discord-fabioarieira8850-5865F2?style=for-the-badge&logo=discord)](https://discord.com)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/fabioarieira)
 
 </div>
