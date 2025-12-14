@@ -12,14 +12,16 @@ import {
   RefreshCw,
   Zap,
   AlertCircle,
+  Settings2,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import {
   generateVideo,
   generateImageUrl,
   enhanceVideoPrompt,
-  getPollenCost,
 } from '../services/pollinationsApi';
+import { VIDEO_MODELS, calculateVideoCost, formatPollenCost, getVideoModelById } from '../constants/videoModels';
+import { ModelSelector } from './ModelSelector';
 
 const EXAMPLE_PROMPTS = [
   "A majestic dragon flying through clouds at sunset",
@@ -33,6 +35,7 @@ const EXAMPLE_PROMPTS = [
 export const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
   const [enhancedPrompt, setEnhancedPrompt] = useState('');
+  const [showModelSettings, setShowModelSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -49,6 +52,10 @@ export const ChatInterface: React.FC = () => {
     setShowPricingModal,
   } = useStore();
 
+  // Get current model and cost
+  const selectedModel = getVideoModelById(settings.selectedVideoModel) || VIDEO_MODELS[0];
+  const estimatedCost = calculateVideoCost(selectedModel.id, settings.videoDuration);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -61,19 +68,21 @@ export const ChatInterface: React.FC = () => {
     setInput('');
     setEnhancedPrompt('');
 
+    // Calculate cost with selected model
+    const cost = calculateVideoCost(settings.selectedVideoModel, settings.videoDuration);
+    
     // Check credits
-    const cost = getPollenCost(5, settings.quality);
     if (credits.balance < cost) {
       addMessage({
         role: 'system',
-        content: `⚠️ Insufficient Pollen Credits! You need ${cost} polens but only have ${credits.balance}. Purchase more credits to continue creating amazing videos!`,
+        content: `⚠️ Insufficient Pollen! You need ${formatPollenCost(cost)} polens but only have ${formatPollenCost(credits.balance)}. Purchase more pollen to continue creating amazing videos!`,
         status: 'error',
       });
       setShowPricingModal(true);
       return;
     }
 
-    // Add user message
+    // Add user message with model info
     addMessage({
       role: 'user',
       content: userPrompt,
@@ -85,7 +94,7 @@ export const ChatInterface: React.FC = () => {
     const assistantMessageId = crypto.randomUUID();
     addMessage({
       role: 'assistant',
-      content: '🎬 Generating your video...',
+      content: `🎬 Generating video with ${selectedModel.icon} ${selectedModel.name}...`,
       status: 'generating',
     });
 
@@ -94,7 +103,7 @@ export const ChatInterface: React.FC = () => {
       let finalPrompt = userPrompt;
       try {
         updateMessage(assistantMessageId, {
-          content: '✨ Enhancing your prompt with AI...',
+          content: `✨ Enhancing your prompt with AI...`,
         });
         finalPrompt = await enhanceVideoPrompt(userPrompt, settings.apiKey);
         setEnhancedPrompt(finalPrompt);
@@ -104,15 +113,17 @@ export const ChatInterface: React.FC = () => {
       }
 
       updateMessage(assistantMessageId, {
-        content: `🎬 Creating video: "${finalPrompt.slice(0, 100)}..."`,
+        content: `🎬 ${selectedModel.icon} ${selectedModel.name} is creating: "${finalPrompt.slice(0, 80)}..."`,
         progress: 30,
       });
 
-      // Generate video
+      // Generate video with selected model
       const videoUrl = await generateVideo({
         prompt: finalPrompt,
-        width: settings.quality === 'ultra' ? 1920 : 1280,
-        height: settings.quality === 'ultra' ? 1080 : 720,
+        model: settings.selectedVideoModel,
+        width: selectedModel.quality === 'ultra' ? 1920 : 1280,
+        height: selectedModel.quality === 'ultra' ? 1080 : 720,
+        duration: settings.videoDuration,
         apiKey: settings.apiKey,
       });
 
@@ -128,7 +139,7 @@ export const ChatInterface: React.FC = () => {
 
       // Update message with video
       updateMessage(assistantMessageId, {
-        content: `🎉 Your video is ready!\n\n**Prompt:** ${finalPrompt}\n\n**Cost:** ${cost} polens`,
+        content: `🎉 Your video is ready!\n\n**Model:** ${selectedModel.icon} ${selectedModel.name}\n**Duration:** ${settings.videoDuration}s\n**Prompt:** ${finalPrompt}\n\n**Cost:** ${formatPollenCost(cost)} polens`,
         videoUrl,
         imageUrl: thumbnailUrl,
         status: 'completed',
@@ -188,9 +199,55 @@ export const ChatInterface: React.FC = () => {
         </motion.div>
       )}
 
+      {/* Model Settings Panel */}
+      <AnimatePresence>
+        {showModelSettings && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="border-t border-white/5 overflow-hidden"
+          >
+            <div className="p-4 bg-dark-800/50">
+              <ModelSelector />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Input Area */}
       <div className="p-4 border-t border-white/5">
         <form onSubmit={handleSubmit} className="relative">
+          {/* Model Quick Info Bar */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <button
+              type="button"
+              onClick={() => setShowModelSettings(!showModelSettings)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-sm"
+            >
+              <span>{selectedModel.icon}</span>
+              <span className="text-gray-300">{selectedModel.name}</span>
+              <span className="text-gray-500">•</span>
+              <span className="text-gray-400">{settings.videoDuration}s</span>
+              <Settings2 size={14} className="text-gray-500 ml-1" />
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-sm">
+                <span className="text-gray-500">Cost:</span>
+                <Zap size={14} className="text-pollen-400" />
+                <span className="text-pollen-400 font-medium">{formatPollenCost(estimatedCost)}</span>
+              </div>
+              <span className="text-gray-600">|</span>
+              <div className="flex items-center gap-1.5 text-sm">
+                <span className="text-gray-500">Balance:</span>
+                <span className={`font-medium ${credits.balance >= estimatedCost ? 'text-green-400' : 'text-red-400'}`}>
+                  {formatPollenCost(credits.balance)}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="glass rounded-2xl p-2 flex items-end gap-2 glow-pollen">
             <textarea
               ref={inputRef}
@@ -204,23 +261,25 @@ export const ChatInterface: React.FC = () => {
             />
             
             <div className="flex items-center gap-2 pr-2">
-              {/* Credits Display */}
+              {/* Buy Pollen Button */}
               <button
                 type="button"
                 onClick={() => setShowPricingModal(true)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-pollen-500/20 hover:bg-pollen-500/30 transition-colors"
+                title="Buy more pollen"
               >
                 <Zap size={16} className="text-pollen-400" />
                 <span className="text-pollen-400 font-medium text-sm">
-                  {credits.balance}
+                  {formatPollenCost(credits.balance)}
                 </span>
               </button>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={!input.trim() || isGenerating}
+                disabled={!input.trim() || isGenerating || credits.balance < estimatedCost}
                 className="p-3 rounded-xl bg-gradient-to-r from-pollen-500 to-pollen-600 hover:from-pollen-400 hover:to-pollen-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all btn-shine"
+                title={credits.balance < estimatedCost ? 'Insufficient pollen' : 'Generate video'}
               >
                 {isGenerating ? (
                   <Loader2 size={20} className="animate-spin text-dark-900" />
@@ -234,7 +293,18 @@ export const ChatInterface: React.FC = () => {
           {/* Helper Text */}
           <div className="flex items-center justify-between mt-2 px-2 text-xs text-gray-500">
             <span>Press Enter to send, Shift+Enter for new line</span>
-            <span>Cost: ~{getPollenCost(5, settings.quality)} polens per video</span>
+            <span className="flex items-center gap-1">
+              <span className="text-pollen-400">Video alpha 🧪</span>
+              <span>•</span>
+              <a 
+                href="https://pollinations.ai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-pollen-400 hover:text-pollen-300"
+              >
+                Pollinations.ai
+              </a>
+            </span>
           </div>
         </form>
       </div>

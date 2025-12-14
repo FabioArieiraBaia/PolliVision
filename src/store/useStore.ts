@@ -95,6 +95,8 @@ export const useStore = create<AppState>()(
         theme: 'dark',
         autoSave: true,
         quality: 'high',
+        selectedVideoModel: 'seedance',
+        videoDuration: 5,
       },
       setSettings: (updates) =>
         set((state) => ({

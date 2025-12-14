@@ -37,9 +37,23 @@ export interface PricingTier {
   features: string[];
 }
 
+export interface VideoModel {
+  id: string;
+  name: string;
+  description: string;
+  pollenPerSecond: number;
+  outputCostPerMillion: number | null;
+  quality: 'standard' | 'high' | 'ultra';
+  speed: 'fast' | 'medium' | 'slow';
+  icon: string;
+  recommended?: boolean;
+}
+
 export interface AppSettings {
   apiKey: string;
   theme: 'dark' | 'light';
   autoSave: boolean;
   quality: 'standard' | 'high' | 'ultra';
+  selectedVideoModel: string;
+  videoDuration: number;
 }
