@@ -48,7 +48,6 @@ export const ChatInterface: React.FC = () => {
     settings,
     isGenerating,
     setIsGenerating,
-    setShowApiKeyModal,
     setShowPricingModal,
   } = useStore();
 
@@ -477,3 +476,5 @@ const MessageBubble: React.FC<{ message: any }> = ({ message }) => {
 };
 
 export default ChatInterface;
+
+

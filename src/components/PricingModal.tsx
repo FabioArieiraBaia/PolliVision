@@ -10,7 +10,6 @@ import {
   ExternalLink,
   CreditCard,
   Gift,
-  TrendingUp,
   Sparkles,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
@@ -289,3 +288,5 @@ export const PricingModal: React.FC = () => {
 };
 
 export default PricingModal;
+
+

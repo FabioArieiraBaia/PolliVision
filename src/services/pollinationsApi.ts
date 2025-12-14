@@ -10,7 +10,6 @@
  * @website https://fabioarieira.com
  */
 
-const POLLINATIONS_BASE_URL = 'https://pollinations.ai';
 const VIDEO_API_URL = 'https://video.pollinations.ai';
 const IMAGE_API_URL = 'https://image.pollinations.ai';
 const TEXT_API_URL = 'https://text.pollinations.ai';
@@ -193,12 +192,12 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
 /**
  * Get user's pollen balance (requires API key)
  */
-export async function getPollenBalance(apiKey: string): Promise<number | null> {
+export async function getPollenBalance(_apiKey: string): Promise<number | null> {
   try {
     // This would typically call the Pollinations balance API
     // For now, we return null to indicate balance check is not available
     // The actual endpoint would be something like:
-    // const response = await fetch(`https://api.pollinations.ai/balance?token=${apiKey}`);
+    // const response = await fetch(`https://api.pollinations.ai/balance?token=${_apiKey}`);
     return null;
   } catch {
     return null;
@@ -216,3 +215,5 @@ export function generateThumbnail(prompt: string): string {
     model: 'flux',
   });
 }
+
+

@@ -57,3 +57,5 @@ export interface AppSettings {
   selectedVideoModel: string;
   videoDuration: number;
 }
+
+

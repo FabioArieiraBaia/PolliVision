@@ -3,13 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare,
   Video,
-  History,
-  Settings,
   Star,
   TrendingUp,
   Zap,
   Gift,
-  HelpCircle,
   ExternalLink,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
@@ -156,3 +153,5 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 };
 
 export default Sidebar;
+
+

@@ -2,14 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Video,
-  Settings,
   Key,
   CreditCard,
-  History,
   Zap,
   Menu,
   X,
-  ExternalLink,
   Github,
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
@@ -107,3 +104,5 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle, isMenuOpen }) => {
 };
 
 export default Header;
+
+
